@@ -1,0 +1,1225 @@
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
+<title>Gamified Study Planner</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Fredoka:wght@400;500;600;700&family=Quicksand:wght@500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0}
+body{
+  font-size:17px;
+  line-height:1.6;
+  font-family:'Quicksand','Nunito',system-ui,sans-serif;
+  background:
+    radial-gradient(circle at 12% 10%, #ffd6ea 0 18%, transparent 19%),
+    radial-gradient(circle at 90% 8%, #d8f7e8 0 16%, transparent 17%),
+    radial-gradient(circle at 70% 92%, #ffe3f2 0 14%, transparent 15%),
+    #ffc2df;
+  color:#3e1f30;
+}
+.sr-only{position:absolute;left:-9999px}
+.tabs{display:flex;flex-wrap:wrap;gap:8px;border-bottom:1px solid #ef9ec6;margin-bottom:1.5rem;padding-bottom:8px}
+.tab{padding:10px 16px;font-size:15px;cursor:pointer;border:none;background:#ffe8f3;color:#934a6f;border-bottom:2px solid transparent;border-radius:12px;transition:all .18s ease;font-family:'Fredoka','Quicksand',sans-serif}
+.tab:hover{transform:translateY(-1px)}
+.tab.active{color:#fff;font-weight:700;border-bottom:2px solid #db3c89;background:linear-gradient(135deg,#ff4aa2,#ff79bc);box-shadow:0 6px 16px rgba(255,74,162,.28)}
+.panel{display:none}.panel.active{display:block}
+
+.row{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:start;margin-bottom:8px}
+.dlabel{font-size:13px;color:#7f5569;text-align:right;padding-top:9px;line-height:1.4;font-weight:700}
+.blk{border-radius:14px;padding:12px 14px;box-shadow:0 6px 14px rgba(140,37,90,.08);border:1px solid rgba(255,255,255,.45)}
+.btitle{font-size:17px;font-weight:700;line-height:1.35}
+.bsub{font-size:14px;margin-top:4px;line-height:1.45}
+.gap{font-size:13px;color:#875d70;padding:4px 0 4px 120px;margin-bottom:6px;font-weight:700}
+
+.c-ar{background:#ffe3dc}.c-ar .btitle{color:#8a3516}.c-ar .bsub{color:#ac4b24}
+.c-bi{background:#def8e9}.c-bi .btitle{color:#1a6b3f}.c-bi .bsub{color:#248e54}
+.c-ch{background:#e6f7ff}.c-ch .btitle{color:#14558f}.c-ch .bsub{color:#1e74bc}
+.c-ph{background:#fff2d7}.c-ph .btitle{color:#815000}.c-ph .bsub{color:#a86c0b}
+.c-ge{background:#f0e9ff}.c-ge .btitle{color:#4a3699}.c-ge .bsub{color:#6a54c0}
+.c-en{background:#ffe2f0}.c-en .btitle{color:#8b2950}.c-en .bsub{color:#b03a67}
+.c-de{background:#f7f2ea}.c-de .btitle{color:#5a544d}.c-de .bsub{color:#746c63}
+.c-ex{background:#d8f8e8}.c-ex .btitle{color:#0f6e4b}.c-ex .bsub{color:#13885e}
+.c-off{background:#ffeef6}.c-off .btitle{color:#8d5c72}.c-off .bsub{color:#a27489}
+
+.wcard{border:1px solid #efb4d1;border-radius:16px;padding:18px 18px;margin-bottom:14px;box-shadow:0 8px 18px rgba(140,37,90,.07);background:#fff8fc}
+.wtitle{font-size:18px;font-weight:700;color:#8c3761;margin-bottom:12px;line-height:1.35;font-family:'Fredoka','Quicksand',sans-serif}
+.wdays{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.dc{border-radius:10px;padding:8px 6px;text-align:center}
+.dn{font-size:12px;font-weight:700;color:#87566c;margin-bottom:4px}
+.ds{font-size:13px;line-height:1.35;color:#805f70}
+
+.tblock{display:grid;grid-template-columns:96px 1fr;gap:10px;align-items:start;margin-bottom:7px}
+.tlabel{font-size:13px;color:#7f5569;text-align:right;padding-top:8px;font-weight:700}
+
+.mcard{border:1px solid #efb4d1;border-radius:16px;padding:18px 18px;margin-bottom:12px;box-shadow:0 8px 18px rgba(140,37,90,.07);background:#fff8fc}
+.mlist{list-style:none;display:flex;flex-direction:column;gap:5px}
+.mlist li{font-size:15px;color:#7a5c6d;padding-left:16px;position:relative;line-height:1.5}
+.mlist li::before{content:"•";position:absolute;left:0;color:#ff4fa3}
+
+.pbar-wrap{height:8px;background:#f6dbe8;border-radius:99px;margin:8px 0 6px}
+.pbar-fill{height:8px;border-radius:99px;transition:width .3s}
+.check-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid #f2c4db;cursor:pointer}
+.check-row:last-child{border-bottom:none}
+.check-row input{width:17px;height:17px;cursor:pointer;accent-color:#ff4fa3}
+.clabel{font-size:15px;color:#5f3348;line-height:1.45}
+.clabel.done{text-decoration:line-through;color:#a67f93}
+.tcard{border:1px solid #efb4d1;border-radius:16px;padding:16px 16px;margin-bottom:10px;background:#fff8fc;box-shadow:0 8px 18px rgba(140,37,90,.07)}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.avatar-card{display:grid;grid-template-columns:92px 1fr;gap:12px;align-items:center;border:1px solid #ef9ec6;background:linear-gradient(135deg,#ffe9f4,#ffd6ea);border-radius:16px;padding:12px 14px;margin:12px 0 14px;box-shadow:0 10px 20px rgba(165,44,105,.14)}
+.avatar-face{font-size:54px;line-height:1;text-align:center;filter:drop-shadow(0 4px 8px rgba(0,0,0,.12))}
+.avatar-name{font-size:12px;font-weight:700;color:#8a4d69;text-transform:uppercase;letter-spacing:.06em}
+.avatar-title{font-family:'Fredoka','Quicksand',sans-serif;font-size:20px;color:#7a2a52;line-height:1.25}
+.avatar-stats{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px}
+.stat-pill{font-size:12px;font-weight:700;color:#7a3758;background:#fff4fa;border:1px solid #efb4d1;border-radius:999px;padding:4px 10px}
+.badge-wrap{margin-top:10px}
+.badge-title{font-size:12px;font-weight:700;color:#8a4d69;text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.badges{display:flex;flex-wrap:wrap;gap:6px}
+.badge{font-size:12px;font-weight:700;border-radius:999px;padding:4px 9px;border:1px solid}
+.badge.locked{color:#9f8a95;background:#f6eef2;border-color:#eadbe3}
+.badge.unlocked{color:#3e2a35;background:#fff;border-color:#e0b4ca}
+.game-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.game-card{border:1px solid #efb4d1;border-radius:16px;padding:14px;background:#fff8fc;box-shadow:0 8px 18px rgba(140,37,90,.07)}
+.gtitle{font-family:'Fredoka','Quicksand',sans-serif;font-size:18px;color:#8c3761;margin-bottom:8px}
+.gsmall{font-size:13px;color:#7a5c6d}
+.chip-row{display:flex;gap:6px;flex-wrap:wrap}
+.chip{font-size:12px;font-weight:700;padding:4px 8px;border-radius:999px;background:#ffeef6;border:1px solid #efb4d1;color:#7a3758}
+.btn{border:none;border-radius:10px;padding:7px 10px;font-weight:700;background:#ff66af;color:#fff;cursor:pointer}
+.btn.alt{background:#26b56a}
+.btn.ghost{background:#fff;color:#8c3761;border:1px solid #efb4d1}
+.quest{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px dashed #efc3d9}
+.quest:last-child{border-bottom:none}
+.meter{height:8px;border-radius:99px;background:#f6dbe8;margin:8px 0}
+.meter > div{height:8px;border-radius:99px;background:linear-gradient(135deg,#24b66a,#ff5ca8)}
+.shop-item{display:flex;align-items:center;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #efc3d9}
+.shop-item:last-child{border-bottom:none}
+.heatmap{display:grid;grid-template-columns:repeat(10,1fr);gap:4px}
+.heat{aspect-ratio:1/1;border-radius:4px;background:#f3e6ed}
+.countdown{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px dashed #efc3d9}
+.countdown:last-child{border-bottom:none}
+#next-exam-banner{border:1px solid #efb4d1;background:linear-gradient(135deg,#ffe8f4,#e8fff2);border-radius:14px;padding:10px 12px;margin-bottom:10px;color:#6f2f4e;font-weight:700}
+#confetti-layer{position:fixed;inset:0;pointer-events:none;overflow:hidden}
+.confetti{position:absolute;font-size:20px;animation:fall 1100ms ease-out forwards}
+@keyframes fall{0%{opacity:1;transform:translateY(0) scale(1)}100%{opacity:0;transform:translateY(-40px) scale(1.6)}}
+
+@media (max-width: 900px){
+  body{font-size:16px}
+  .row{grid-template-columns:1fr}
+  .dlabel{text-align:left;padding-top:0}
+  .gap{padding-left:0}
+  .tgrid{grid-template-columns:1fr}
+  .wdays{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .tab{font-size:14px;padding:10px 12px}
+  .avatar-card{grid-template-columns:1fr}
+  .avatar-face{text-align:left}
+  .game-grid{grid-template-columns:1fr}
+}
+</style>
+
+<h2 class="sr-only">Study plan from April 21 to June 18: sciences get two papers each covering full syllabus, Arabic, English, and German each have one exam covering the whole syllabus.</h2>
+
+<div style="padding:1rem 0 0">
+<div style="margin-bottom:1.25rem">
+  <div style="font-size:18px;font-weight:500;color:var(--color-text-primary)">Study plan — Apr 21 to Jun 18</div>
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-top:4px">Sciences: 2 papers each (full syllabus both times) · Arabic / English / German: 1 exam each · 5-day Arabic prep · ~3-day gaps</div>
+</div>
+
+<div class="avatar-card">
+  <div class="avatar-face" id="avatar-face">🌱</div>
+  <div>
+    <div class="avatar-name">Your Study Character</div>
+    <div class="avatar-title" id="avatar-title">Seedling Scholar</div>
+    <div class="pbar-wrap" style="margin-top:7px"><div class="pbar-fill" id="avatar-xp-bar" style="width:0%;background:linear-gradient(135deg,#24b66a,#ff5ca8)"></div></div>
+    <div class="avatar-stats">
+      <span class="stat-pill" id="avatar-level">Level 1</span>
+      <span class="stat-pill" id="avatar-xp">XP 0 / 100</span>
+      <span class="stat-pill" id="avatar-streak">Streak 0</span>
+    </div>
+    <div class="badge-wrap">
+      <div class="badge-title">Badges</div>
+      <div class="badges" id="badges-list"></div>
+    </div>
+  </div>
+</div>
+
+<div class="tabs">
+  <button class="tab active" onclick="show('tl',this)">Timeline</button>
+  <button class="tab" onclick="show('wk',this)">Weekly</button>
+  <button class="tab" onclick="show('dy',this)">Daily</button>
+  <button class="tab" onclick="show('mt',this)">Methods</button>
+  <button class="tab" onclick="show('tr',this)">Tracker</button>
+  <button class="tab" onclick="show('rs',this)">Resources</button>
+  <button class="tab" onclick="show('gm',this)">Game Hub</button>
+</div>
+
+<div id="tl" class="panel active">
+  <div style="padding:8px 12px;background:var(--color-background-secondary);border-radius:8px;font-size:12px;color:var(--color-text-secondary);margin-bottom:12px">
+    Phase 1 (Apr 21–May 10): cover all science + languages in rotation. Phase 2 (May 11–15): Arabic only. Then exams begin. Each science paper covers the full syllabus — both sittings are full revisions, not splits.
+  </div>
+
+  <div class="row"><div class="dlabel">Apr 21 – May 10</div>
+    <div class="blk c-bi"><div class="btitle">Phase 1 — full content coverage (20 days)</div><div class="bsub">Biology · Chemistry · Physics · Geology covered in rotation · English + German evenings</div></div></div>
+
+  <div class="row"><div class="dlabel">May 11–15</div>
+    <div class="blk c-ar"><div class="btitle">Phase 2 — Arabic only (5 days)</div><div class="bsub">Nahw · Novel · Balagha · Reading · Literature — full syllabus revision + mock</div></div></div>
+
+  <div class="gap">— Exam 1 —</div>
+  <div class="row"><div class="dlabel">May 16 (Fri)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 1 — Arabic</div><div class="bsub">Full syllabus · one sitting · one exam</div></div></div>
+
+  <div class="gap">— 3-day gap: Biology first revision (full syllabus) —</div>
+  <div class="row"><div class="dlabel">May 17–18</div>
+    <div class="blk c-bi"><div class="btitle">Biology revision 1 — full syllabus</div><div class="bsub">Nervous · Endocrine · Skeletomuscular · Excretory · Digestive · Respiratory · Immune</div></div></div>
+
+  <div class="gap">— Exam 2 —</div>
+  <div class="row"><div class="dlabel">May 19 (Mon)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 2 — Biology paper 1</div><div class="bsub">Full syllabus</div></div></div>
+
+  <div class="gap">— 3-day gap: Biology second full revision —</div>
+  <div class="row"><div class="dlabel">May 20–21</div>
+    <div class="blk c-bi"><div class="btitle">Biology revision 2 — full syllabus</div><div class="bsub">Focus on weak areas from paper 1 · re-draw all diagrams · timed questions</div></div></div>
+
+  <div class="gap">— Exam 3 —</div>
+  <div class="row"><div class="dlabel">May 22 (Thu)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 3 — Biology paper 2</div><div class="bsub">Full syllabus again</div></div></div>
+
+  <div class="gap">— 3-day gap: Chemistry first revision (full syllabus) —</div>
+  <div class="row"><div class="dlabel">May 23–24</div>
+    <div class="blk c-ch"><div class="btitle">Chemistry revision 1 — full syllabus</div><div class="bsub">CH 1–7 + CH 8–18 + Organic · problem sets · formula sheet from memory</div></div></div>
+
+  <div class="gap">— Exam 4 —</div>
+  <div class="row"><div class="dlabel">May 25 (Sun)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 4 — Chemistry paper 1</div><div class="bsub">Full syllabus</div></div></div>
+
+  <div class="gap">— 3-day gap: Chemistry second full revision —</div>
+  <div class="row"><div class="dlabel">May 26–27</div>
+    <div class="blk c-ch"><div class="btitle">Chemistry revision 2 — full syllabus</div><div class="bsub">Redo all problem types · organic reaction map · weak chapters only</div></div></div>
+
+  <div class="gap">— Exam 5 —</div>
+  <div class="row"><div class="dlabel">May 28 (Wed)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 5 — Chemistry paper 2</div><div class="bsub">Full syllabus again</div></div></div>
+
+  <div class="gap">— 3-day gap: Physics first revision (full syllabus) —</div>
+  <div class="row"><div class="dlabel">May 29–30</div>
+    <div class="blk c-ph"><div class="btitle">Physics revision 1 — full syllabus</div><div class="bsub">Capacitors · Inductors · AC · Magnetism · Induction · Generators · Diodes · Materials</div></div></div>
+
+  <div class="gap">— Exam 6 —</div>
+  <div class="row"><div class="dlabel">May 31 (Sat)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 6 — Physics paper 1</div><div class="bsub">Full syllabus</div></div></div>
+
+  <div class="gap">— 3-day gap: Physics second full revision —</div>
+  <div class="row"><div class="dlabel">Jun 1–2</div>
+    <div class="blk c-ph"><div class="btitle">Physics revision 2 — full syllabus</div><div class="bsub">Derive formulas again · annotate all circuits · past-question blitz</div></div></div>
+
+  <div class="gap">— Exam 7 —</div>
+  <div class="row"><div class="dlabel">Jun 3 (Tue)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 7 — Physics paper 2</div><div class="bsub">Full syllabus again</div></div></div>
+
+  <div class="gap">— 3-day gap: Geology first revision (full syllabus) —</div>
+  <div class="row"><div class="dlabel">Jun 4–5</div>
+    <div class="blk c-ge"><div class="btitle">Geology revision 1 — full syllabus</div><div class="bsub">Rock · Water · Wind · Earthquakes · Fossil fuels · Geophysics · Remote sensing</div></div></div>
+
+  <div class="gap">— Exam 8 —</div>
+  <div class="row"><div class="dlabel">Jun 6 (Fri)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 8 — Geology paper 1</div><div class="bsub">Full syllabus</div></div></div>
+
+  <div class="gap">— 3-day gap: Geology second full revision —</div>
+  <div class="row"><div class="dlabel">Jun 7–8</div>
+    <div class="blk c-ge"><div class="btitle">Geology revision 2 — full syllabus</div><div class="bsub">Maps of Egypt · seismogram practice · geophysics methods · remote sensing vocab</div></div></div>
+
+  <div class="gap">— Exam 9 —</div>
+  <div class="row"><div class="dlabel">Jun 9 (Mon)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 9 — Geology paper 2</div><div class="bsub">Full syllabus again</div></div></div>
+
+  <div class="gap">— 3-day gap: English full revision —</div>
+  <div class="row"><div class="dlabel">Jun 10–11</div>
+    <div class="blk c-en"><div class="btitle">English revision — all 6 cycles</div><div class="bsub">3 cycles per day · vocabulary · grammar · writing practice · timed passage</div></div></div>
+
+  <div class="gap">— Exam 10 —</div>
+  <div class="row"><div class="dlabel">Jun 12 (Thu)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 10 — English</div><div class="bsub">Full syllabus · one sitting</div></div></div>
+
+  <div class="gap">— 3-day gap: German full revision —</div>
+  <div class="row"><div class="dlabel">Jun 13–14</div>
+    <div class="blk c-de"><div class="btitle">German revision — all 14 Lektionen</div><div class="bsub">7 per day · grammar structures · vocabulary lists · write short paragraphs per Lektion</div></div></div>
+
+  <div class="gap">— Exam 11 (final) —</div>
+  <div class="row"><div class="dlabel">Jun 15 (Sun)</div>
+    <div class="blk c-ex"><div class="btitle">Exam 11 — German</div><div class="bsub">Full syllabus · one sitting</div></div></div>
+</div>
+
+<div id="wk" class="panel">
+
+  <div class="wcard">
+    <div class="wtitle">Full studying pt1 </div>
+    <div class="wdays">
+      <div class="dc c-bi"><div class="dn">Tue 21</div><div class="ds">Geology rock and water + chemistry foundations</div></div>
+      <div class="dc c-bi"><div class="dn">Wed 22</div><div class="ds">Geology wind, desert and soil, earthquakes + Chemistry ch 2 </div></div>
+      <div class="dc c-bi"><div class="dn">Thu 23</div><div class="ds">Geology fossil fuels and geophysics + Chemistry stoichiometry</div></div>
+      <div class="dc c-off"><div class="dn">Fri 24</div><div class="ds">Geology remote sensing + close geology first pass</div></div>
+      <div class="dc c-bi"><div class="dn">Sat 25</div><div class="ds">Biology nervous and endocrine first pass</div></div>
+      <div class="dc c-bi"><div class="dn">Sun 26</div><div class="ds">Biology skeletomuscular and excretory first pass</div></div>
+      <div class="dc c-bi"><div class="dn">Mon 27</div><div class="ds">Biology digestive, respiratory, immune closeout</div></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--color-text-tertiary)">Evenings: 30 min English or German vocabulary each night. Arabic Everyday, 1 URT exam</div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle">Full studying pt2</div>
+    <div class="wdays">
+      <div class="dc c-ch"><div class="dn">Tue 28</div><div class="ds">Physics capacitors, inductors, AC circuits</div></div>
+      <div class="dc c-ch"><div class="dn">Wed 29</div><div class="ds">Physics magnetism, induction, transformers, diodes</div></div>
+      <div class="dc c-ch"><div class="dn">Thu 30</div><div class="ds"> Chemistry upper chapters, Organic</div></div>
+      <div class="dc c-off"><div class="dn">Fri 1</div><div class="ds">Rest</div></div>
+    </div>
+    <div style="margin-top:8px;font-size:11px;color:var(--color-text-tertiary)">Materials Physics LO 12–14: read as evening material on Physics days.</div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle">Revision</div>
+    <div class="wdays">
+      <div class="dc c-ch"><div class="dn">Sat 2</div><div class="ds">Biology + geology + English + URT</div></div>
+      <div class="dc c-ch"><div class="dn">Sun 3</div><div class="ds">Chemistry + Physics + duetsch + URT</div></div>
+      <div class="dc c-ch"><div class="dn">Mon 4</div><div class="ds">Biology + geology + English + URT</div></div>
+      <div class="dc c-ph"><div class="dn">Tue 5</div><div class="ds">Chemistry + Physics + duetsch + URT</div></div>
+      <div class="dc c-ph"><div class="dn">Wed 6</div><div class="ds">Biology + geology + English + URT</div></div>
+      <div class="dc c-ph"><div class="dn">Thu 7</div><div class="ds">Chemistry + Physics + duetsch + URT</div></div>
+      <div class="dc c-off"><div class="dn">Fri 8</div><div class="ds">Biology + geology + English + URT</div></div>
+      <div class="dc c-ge"><div class="dn">Sat 9</div><div class="ds">Chemistry + Physics + duetsch + URT</div></div>
+      <div class="dc c-ge"><div class="dn">Sun 10</div><div class="ds">Biology + geology + English + URT</div></div>
+      <div class="dc c-off"><div class="dn">Mon 11</div><div class="ds">—</div></div>
+    </div>
+   </div>
+
+  <div class="wcard">
+    <div class="wtitle">May 11–15 — Arabic only (Phase 2, no science)</div>
+    <div class="wdays">
+      <div class="dc c-ar"><div class="dn">Tue 12</div><div class="ds">Nahw units 1–4</div></div>
+      <div class="dc c-ar"><div class="dn">Wed 13</div><div class="ds">Nahw 5–7 + Balagha 4 lessons</div></div>
+      <div class="dc c-ar"><div class="dn">Thu 14</div><div class="ds">Novel ch 1–11</div></div>
+      <div class="dc c-ar"><div class="dn">Fri 15</div><div class="ds">Novel 12–22 + Literature 15 lessons</div></div>
+    
+    
+    </div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle">— Not added subjects</div>
+    <div class="wdays">
+      <div class="dc c-bi"><div class="dn">Sat 16</div><div class="ds">Religion + Citizenship </div></div>
+      <div class="dc c-bi"><div class="dn">Sun 17</div><div class="ds">Mock test</div></div>
+    </div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle"> — Deutsch URT & TOC</div>
+    <div class="wdays">
+      <div class="dc c-ch"><div class="dn">Mon 18</div><div class="ds">Lektions 1-7 + Mock tests URT</div></div>
+      <div class="dc c-ch"><div class="dn">Tue 19</div><div class="ds">Lektions 8-14 + Old exams + URT exam</div></div>
+    </div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle">Chemistry TOC </div>
+    <div class="wdays">
+      <div class="dc c-ph"><div class="dn">Wed 20</div><div class="ds">Chapters 1st half</div></div>
+      <div class="dc c-ph"><div class="dn">Thu 21</div><div class="ds">Chapters 2nd half</div></div>
+      <div class="dc c-ex"><div class="dn">Fri 22</div><div class="ds">Old exams</div></div>
+      <div class="dc c-ph"><div class="dn">Sat 23</div><div class="ds">Old exams</div></div>
+    </div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle"> English TOC + URT</div>
+    <div class="wdays">
+      <div class="dc c-ge"><div class="dn">Sun 24</div><div class="ds">Physics TOC </div></div>
+      <div class="dc c-ge"><div class="dn">Mon 25</div><div class="ds">Physics TOC</div></div>
+      <div class="dc c-ex"><div class="dn">Tue 26</div><div class="ds">Physics TOC</div></div>
+      <div class="dc c-ge"><div class="dn">Wed 27</div><div class="ds">Physics TOC</div></div>
+      <div class="dc c-ge"><div class="dn">Thu 28</div><div class="ds">Full mock + vocab</div></div>
+      <div class="dc c-ex"><div class="dn">Fri 29</div><div class="ds">EXAM 2</div></div>
+      <div class="dc c-en"><div class="dn">Sat 30</div><div class="ds">English cycles 1–2 + URT</div></div>
+      <div class="dc c-en"><div class="dn">Sun 31</div><div class="ds">English cycles 3-4 URT </div></div>
+      <div class="dc c-en"><div class="dn">Mon 1</div><div class="ds">English cycles 5–6 + URT</div></div>
+    </div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle">TOC Physics</div>
+    <div class="wdays">
+      <div class="dc c-en"><div class="dn">Tue 2</div><div class="ds">Physics revision</div></div>
+      <div class="dc c-en"><div class="dn">Wed 3</div><div class="ds">Questions</div></div>
+      <div class="dc c-ex"><div class="dn">Thu 4</div><div class="ds">Mock test</div></div>
+      <div class="dc c-de"><div class="dn">Fri 5</div><div class="ds">Past papers</div></div>
+    </div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle">URT chemistry-physics</div>
+    <div class="wdays">
+      <div class="dc c-en"><div class="dn">Sat 6</div><div class="ds">Past exams</div></div>
+      <div class="dc c-en"><div class="dn">Sun 7</div><div class="ds">Exams</div></div>
+      <div class="dc c-ex"><div class="dn">Mon 8</div><div class="ds">Mock test</div></div>
+    </div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle">TOC Biology</div>
+    <div class="wdays">
+      <div class="dc c-en"><div class="dn">Tue 9</div><div class="ds">Inventory + Sem 1</div></div>
+      <div class="dc c-en"><div class="dn">Wed 10</div><div class="ds">Sem 2 + Questions</div></div>
+      <div class="dc c-ex"><div class="dn">Thu 11</div><div class="ds">Past Papers</div></div>
+      <div class="dc c-de"><div class="dn">Fri 12</div><div class="ds">Past papers</div></div>
+    </div>
+  </div>
+
+  <div class="wcard">
+    <div class="wtitle">TOC Geology</div>
+    <div class="wdays">
+      <div class="dc c-en"><div class="dn">Sat 13</div><div class="ds">Revision</div></div>
+      <div class="dc c-en"><div class="dn">Sun 14</div><div class="ds">Mock tests & Past papers</div></div>
+      <div class="dc c-ex"><div class="dn">Mon 15</div><div class="ds">Past Papers</div></div>
+    </div>
+
+  <div class="wcard">
+   <div class="wtitle">URT Biology & Geology</div>
+    <div class="wdays">
+      <div class="dc c-en"><div class="dn">Tue 16</div><div class="ds">Past papers</div></div>
+      <div class="dc c-en"><div class="dn">Wed 17</div><div class="ds">Past Papers</div></div>
+      <div class="dc c-ex"><div class="dn">Thu 18</div><div class="ds">Past Papers</div></div>
+      <div class="dc c-de"><div class="dn">Fri 19</div><div class="ds">Past papers</div></div>
+      <div class="dc c-de"><div class="dn">Sat 20</div><div class="ds">THE END !</div></div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<div id="dy" class="panel">
+
+  <div style="padding:12px 14px;background:var(--color-background-secondary);border-radius:10px;margin-bottom:14px;font-size:14px;color:var(--color-text-secondary)">
+    This routine matches your weekly flow: science-heavy in Phase 1, Arabic sprint in Phase 2, then short revision cycles between exams. Use the same time blocks daily and only swap subjects based on the current week.
+  </div>
+
+  <div style="font-size:12px;font-weight:700;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Core daily routine (all study days)</div>
+  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1rem">
+    <div class="tblock"><div class="tlabel">7:00 – 7:30</div><div class="blk c-off"><div class="btitle">Warm-up + plan</div><div class="bsub">Review yesterday errors, choose top 3 targets, set one boss task</div></div></div>
+    <div class="tblock"><div class="tlabel">7:30 – 9:30</div><div class="blk c-bi"><div class="btitle">Block A — main weekly subject</div><div class="bsub">New learning + active notes (Biology week / Chemistry week / Physics week)</div></div></div>
+    <div class="tblock"><div class="tlabel">9:30 – 9:50</div><div class="blk c-off"><div class="btitle">Break</div><div class="bsub">Hydrate, walk, no phone scrolling</div></div></div>
+    <div class="tblock"><div class="tlabel">9:50 – 11:30</div><div class="blk c-ch"><div class="btitle">Block B — practice set</div><div class="bsub">Timed questions from Block A topic + immediate correction log</div></div></div>
+    <div class="tblock"><div class="tlabel">11:30 – 12:00</div><div class="blk c-off"><div class="btitle">Quick recap</div><div class="bsub">Summarize without notes; mark weak points for afternoon</div></div></div>
+  </div>
+
+  <div style="font-size:12px;font-weight:700;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Afternoon structure</div>
+  <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:1rem">
+    <div class="tblock"><div class="tlabel">12:00 – 1:20</div><div class="blk c-off"><div class="btitle">Lunch + reset</div><div class="bsub">Eat, rest, short nap if needed</div></div></div>
+    <div class="tblock"><div class="tlabel">1:20 – 2:50</div><div class="blk c-ph"><div class="btitle">Block C — support subject</div><div class="bsub">Use weekly plan: Geology on physics week, language review on science weeks</div></div></div>
+    <div class="tblock"><div class="tlabel">2:50 – 3:10</div><div class="blk c-off"><div class="btitle">Break</div><div class="bsub">Snack + movement</div></div></div>
+    <div class="tblock"><div class="tlabel">3:10 – 4:30</div><div class="blk c-ge"><div class="btitle">Block D — weak-topic repair</div><div class="bsub">Redo wrong questions, rewrite formulas/diagrams from memory</div></div></div>
+  </div>
+
+  <div style="font-size:12px;font-weight:700;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:.04em;margin-bottom:8px">Evening + phase rules</div>
+  <div style="display:flex;flex-direction:column;gap:6px">
+    <div class="tblock"><div class="tlabel">5:00 – 5:50</div><div class="blk c-off"><div class="btitle">Dinner break</div><div class="bsub">Protect recovery to keep consistency</div></div></div>
+    <div class="tblock"><div class="tlabel">5:50 – 6:50</div><div class="blk c-en"><div class="btitle">Language block</div><div class="bsub">Science weeks: English/German rotation · Arabic phase: Nahw + literature drill</div></div></div>
+    <div class="tblock"><div class="tlabel">6:50 – 7:20</div><div class="blk c-off"><div class="btitle">Game Hub close-out</div><div class="bsub">Tick tracker/resources, clear daily quests, review tomorrow’s weekly targets</div></div></div>
+    <div class="tblock"><div class="tlabel">Phase 2 rule</div><div class="blk c-ar"><div class="btitle">May 11–15 Arabic sprint</div><div class="bsub">Blocks A-D all Arabic (Nahw, Novel, Balagha, Reading, Literature), daily mini mock</div></div></div>
+    <div class="tblock"><div class="tlabel">Exam-gap rule</div><div class="blk c-ex"><div class="btitle">Between exams</div><div class="bsub">Day 1: full-syllabus revision · Day 2: timed paper + correction · Day 3: weak points only, stop heavy work by 4pm</div></div></div>
+  </div>
+</div>
+
+<div id="mt" class="panel">
+  <div class="mcard">
+    <div style="font-size:14px;font-weight:500;color:#27500A;margin-bottom:8px">Biology</div>
+    <ul class="mlist">
+      <li>Draw every system completely from memory on a blank page before checking — neuron, nephron, sarcomere, alimentary canal, heart, lung</li>
+      <li>Cornell notes for each system: left = key term, right = function/mechanism, bottom = 3-line summary</li>
+      <li>Teach each system aloud as if explaining to someone who knows nothing</li>
+      <li>Flashcards for all hormones, receptors, and feedback loops — test yourself daily</li>
+      <li>Since both papers cover the full syllabus, use paper 1 feedback to target weak systems for paper 2</li>
+    </ul>
+  </div>
+  <div class="mcard">
+    <div style="font-size:14px;font-weight:500;color:#0C447C;margin-bottom:8px">Chemistry</div>
+    <ul class="mlist">
+      <li>Solve a minimum of 10 numerical problems per chapter — stoichiometry, equilibrium, and electrochemistry need repeated drilling</li>
+      <li>Build one A4 organic reaction map linking alkanes → alkenes → alkynes → benzene → alcohols → esters — reproduce it from memory each revision day</li>
+      <li>Make a single-page formula and constant sheet; cover it and rewrite it from memory each morning</li>
+      <li>For conceptual chapters (thermodynamics, bonding) write short explanatory paragraphs — not bullet points</li>
+      <li>Both papers cover everything: use paper 1 to find which chapters need more problem practice before paper 2</li>
+    </ul>
+  </div>
+  <div class="mcard">
+    <div style="font-size:14px;font-weight:500;color:#633806;margin-bottom:8px">Physics</div>
+    <ul class="mlist">
+      <li>Derive every formula from first principles rather than memorising — if you understand the derivation you can reconstruct it in the exam</li>
+      <li>Draw and fully label every circuit type: capacitor charge/discharge, RL, AC, transformer — do this from memory each session</li>
+      <li>Structured problem approach: identify the type → write all relevant equations → solve → check units</li>
+      <li>Materials Physics LO 12–14 is conceptual — focus on definitions, key phenomena, and distinguishing characteristics</li>
+      <li>Both papers are full syllabus: use paper 1 to find which topics need more derivation practice</li>
+    </ul>
+  </div>
+  <div class="mcard">
+    <div style="font-size:14px;font-weight:500;color:#3C3489;margin-bottom:8px">Geology</div>
+    <ul class="mlist">
+      <li>Draw the full rock cycle and water cycle from memory — annotate every stage and process</li>
+      <li>Practice interpreting seismograms step-by-step: identify P and S wave arrivals → calculate distance → locate epicenter</li>
+      <li>Study geological and distribution maps of Egypt — know where coal, petroleum, seismic zones are located</li>
+      <li>For geophysics: make a table of method → what it measures → what property it detects → application</li>
+      <li>Remote sensing: learn the vocabulary and classification of techniques; practice describing false-color image processing steps</li>
+    </ul>
+  </div>
+  <div class="mcard">
+    <div style="font-size:14px;font-weight:500;color:#712B13;margin-bottom:8px">Arabic (one exam — full syllabus)</div>
+    <ul class="mlist">
+      <li>Nahw: write your own example sentences for every rule — reading the rule alone is not enough</li>
+      <li>Novel: make a character map and a chapter-by-chapter event timeline for all 22 chapters</li>
+      <li>Balagha: build a table of literary devices with one original example for each</li>
+      <li>Literature: write a short paragraph summary for each of the 15 lessons, then memorise key lines</li>
+      <li>Timed writing practice: one analytical paragraph in 20 minutes each day of Phase 2</li>
+    </ul>
+  </div>
+  <div class="mcard">
+    <div style="font-size:14px;font-weight:500;color:#72243E;margin-bottom:8px">English (one exam — 6 cycles)</div>
+    <ul class="mlist">
+      <li>3 cycles per revision day — summarise vocabulary, grammar points, and key themes for each</li>
+      <li>Write one short paragraph per cycle using the target vocabulary so words stick in context</li>
+      <li>Read your summary notes aloud — hearing yourself boosts retention for language</li>
+      <li>Timed passage practice: read + answer comprehension questions within the time limit</li>
+    </ul>
+  </div>
+  <div class="mcard">
+    <div style="font-size:14px;font-weight:500;color:#444441;margin-bottom:8px">German (one exam — 14 Lektionen)</div>
+    <ul class="mlist">
+      <li>7 Lektionen per day — grammar structures first, vocabulary second, example sentences third</li>
+      <li>Write one short paragraph per Lektion using key words — production beats passive reading</li>
+      <li>Focus especially on verb conjugations, cases, and any irregular forms — these appear in every exam question</li>
+      <li>Read dialogues aloud to internalise sentence rhythm</li>
+    </ul>
+  </div>
+</div>
+
+<div id="tr" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem">Tick off topics as you cover them. Progress updates live. Use this at the end of each study day.</div>
+
+  <div style="border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:12px 16px;margin-bottom:1.25rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:6px">Overall progress</div>
+    <div class="pbar-wrap"><div class="pbar-fill" id="main-bar" style="width:0%;background:#1D9E75"></div></div>
+    <div style="font-size:11px;color:var(--color-text-secondary)" id="main-label">0 of 0 topics completed</div>
+  </div>
+
+  <div class="tgrid" id="tracker-grid"></div>
+</div>
+
+<div id="rs" class="panel">
+  <div style="font-size:13px;color:var(--color-text-secondary);margin-bottom:1rem">Track resource preparation the same way you track study topics.</div>
+
+  <div style="border:0.5px solid var(--color-border-tertiary);border-radius:12px;padding:12px 16px;margin-bottom:1.25rem">
+    <div style="font-size:14px;font-weight:500;margin-bottom:6px">Resources progress</div>
+    <div class="pbar-wrap"><div class="pbar-fill" id="res-main-bar" style="width:0%;background:#1D9E75"></div></div>
+    <div style="font-size:11px;color:var(--color-text-secondary)" id="res-main-label">0 of 0 resources completed</div>
+  </div>
+
+  <div class="tgrid" id="resources-grid"></div>
+</div>
+
+<div id="gm" class="panel">
+  <div id="next-exam-banner">Next exam: loading...</div>
+  <div class="game-grid">
+    <div class="game-card">
+      <div class="gtitle">Daily Quests</div>
+      <div id="quest-list"></div>
+      <div class="gsmall" id="quest-date"></div>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">Boss Battles</div>
+      <div id="boss-list"></div>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">Energy & Coins</div>
+      <div class="chip-row" style="margin-bottom:8px">
+        <span class="chip" id="energy-label">Energy: 5/5</span>
+        <span class="chip" id="coins-label">Coins: 0</span>
+      </div>
+      <button class="btn alt" id="rest-btn">Rest (+1 energy)</button>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">Reward Shop</div>
+      <div id="shop-list"></div>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">Skill Tree</div>
+      <div class="gsmall" id="skill-points">Skill points: 0</div>
+      <div id="skills-list" style="margin-top:8px"></div>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">Weakness Radar</div>
+      <div id="weakness-list"></div>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">Focus Timer</div>
+      <div style="font-size:28px;font-weight:700;color:#7a2a52" id="timer-label">25:00</div>
+      <div class="chip-row" style="margin-top:8px">
+        <button class="btn" id="timer-start">Start</button>
+        <button class="btn ghost" id="timer-pause">Pause</button>
+        <button class="btn alt" id="timer-reset">Reset</button>
+      </div>
+      <div class="gsmall" style="margin-top:8px">Complete a session to gain bonus XP + coins.</div>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">30-Day Heatmap</div>
+      <div class="heatmap" id="heatmap"></div>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">Exam Countdown</div>
+      <div id="countdown-list"></div>
+    </div>
+    <div class="game-card">
+      <div class="gtitle">Character Customization</div>
+      <div class="gsmall">Avatar</div>
+      <div class="chip-row" id="avatar-picker" style="margin:6px 0 10px"></div>
+      <div class="gsmall">Theme Accent</div>
+      <div class="chip-row" id="theme-picker" style="margin-top:6px"></div>
+    </div>
+  </div>
+</div>
+</div>
+
+<script>
+function show(id, btn) {
+  document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  btn.classList.add('active');
+}
+
+const subjects = [
+  {name:'Biology', color:'#27500A', bg:'#EAF3DE', topics:[
+    'Nervous system — neurons, impulse, synapses',
+    'Brain regions and functions',
+    'Endocrine — hormone types and receptors',
+    'Endocrine — feedback, menstrual cycle',
+    'Skeletomuscular — sarcomere and contraction',
+    'Skeleton, joints, cartilage, diseases',
+    'Excretory — nephron and urine formation',
+    'Osmoregulation — ADH, aldosterone, RAAS',
+    'Digestive system and regulation',
+    'Respiratory system and gas exchange',
+    'Immune — innate immunity and inflammation',
+    'Immune — acquired immunity, B and T cells'
+  ]},
+  {name:'Chemistry', color:'#0C447C', bg:'#E6F1FB', topics:[
+    'CH 1–2 foundations and atomic theory',
+    'CH 3 stoichiometry',
+    'CH 4 types of reactions',
+    'CH 5 gases',
+    'CH 6 thermochemistry',
+    'CH 7 atomic structure and periodicity',
+    'CH 8 bonding general concepts',
+    'CH 9–10 covalent bonding and liquids',
+    'CH 11 solutions',
+    'CH 12 chemical kinetics',
+    'CH 13 equilibrium',
+    'CH 14–15 acids and bases',
+    'CH 16 solubility equilibria',
+    'CH 17 entropy and free energy',
+    'CH 18 electrochemistry',
+    'Organic — alkanes and alkenes',
+    'Organic — benzene and reactions',
+    'Organic — alcohols and esters'
+  ]},
+  {name:'Physics', color:'#633806', bg:'#FAEEDA', topics:[
+    'Capacitors — charging, discharging, energy',
+    'Inductors — RL circuit, time constant',
+    'AC circuits — impedance, rms, power',
+    'Magnetic fields — force, direction, torque',
+    'Measuring devices — galvanometer, ammeter, voltmeter',
+    'Electromagnetic induction — Faraday, Lenz',
+    'AC and DC generators',
+    'Transformers — step up, step down, eddy currents',
+    'Mutual induction and coefficient',
+    'Diodes — rectification, breakdown voltage',
+    'Materials Physics LO 12 — thermal and electrical',
+    'Materials Physics LO 13 — low temperature',
+    'Materials Physics LO 14 — nanoparticles'
+  ]},
+  {name:'Geology', color:'#3C3489', bg:'#EEEDFE', topics:[
+    'Rock cycle — types, textures, cross sections',
+    'Water cycle — reservoirs and properties',
+    'Wind and desert — erosion and deposition',
+    'Soils — composition and properties',
+    'Earthquakes — seismic waves and seismograms',
+    'Fossil fuels — coal, environment',
+    'Petroleum and natural gas',
+    'Acid rain and fossil fuel impact',
+    'Geophysics — gravity, magnetism, seismic methods',
+    'Remote sensing — basics and image classification',
+    'Remote sensing — GIS, image processing, DEM'
+  ]},
+  {name:'Arabic', color:'#712B13', bg:'#FAECE7', topics:[
+    'Nahw units 1–2',
+    'Nahw units 3–4',
+    'Nahw units 5–7',
+    'Novel chapters 1–8',
+    'Novel chapters 9–16',
+    'Novel chapters 17–22',
+    'Balagha — all 4 lessons',
+    'Reading — all 5 lessons',
+    'Literature — all 15 lessons'
+  ]},
+  {name:'English', color:'#72243E', bg:'#FBEAF0', topics:[
+    'Cycle 1 — vocabulary, grammar, theme',
+    'Cycle 2 — vocabulary, grammar, theme',
+    'Cycle 3 — vocabulary, grammar, theme',
+    'Cycle 4 — vocabulary, grammar, theme',
+    'Cycle 5 — vocabulary, grammar, theme',
+    'Cycle 6 — vocabulary, grammar, theme'
+  ]},
+  {name:'German', color:'#444441', bg:'#F1EFE8', topics:[
+    'Lektionen 1–2',
+    'Lektionen 3–4',
+    'Lektionen 5–6',
+    'Lektionen 7–8',
+    'Lektionen 9–10',
+    'Lektionen 11–12',
+    'Lektionen 13–14'
+  ]}
+];
+
+const resources = [
+  {name:'Biology', color:'#27500A', items:[
+    'Chapter summary sheets',
+    'Diagram pack (systems + labels)',
+    'Past papers set 1',
+    'Past papers set 2'
+  ]},
+  {name:'Chemistry', color:'#0C447C', items:[
+    'Formula/constants sheet',
+    'Organic reaction map',
+    'Numerical drills by chapter',
+    'Past papers with marking scheme'
+  ]},
+  {name:'Physics', color:'#633806', items:[
+    'Formula derivation notebook',
+    'Circuit diagram sheet',
+    'Concept checklist (LO 12–14)',
+    'Past papers + worked solutions'
+  ]},
+  {name:'Geology', color:'#3C3489', items:[
+    'Rock/water cycle maps',
+    'Seismogram practice pack',
+    'Egypt geology map notes',
+    'Remote sensing glossary'
+  ]},
+  {name:'Arabic', color:'#712B13', items:[
+    'Nahw grammar summary notes',
+    'Balagha and literature key points',
+    'Novel chapter timeline sheets',
+    'Arabic writing templates'
+  ]},
+  {name:'English', color:'#72243E', items:[
+    'Cycles vocabulary lists',
+    'Grammar rules quick sheet',
+    'Timed comprehension passages',
+    'Writing templates + model answers'
+  ]},
+  {name:'German', color:'#444441', items:[
+    'Lektionen vocabulary sheets',
+    'Grammar structures summary',
+    'Short paragraph practice prompts',
+    'Past paper language pack'
+  ]}
+];
+
+const saveKey = 'studyGameV2';
+const defaultGameState = {
+  checks: {},
+  resources: {},
+  coins: 0,
+  energy: 5,
+  streak: 0,
+  lastActiveDate: '',
+  history: {},
+  skills: {memory:0,speed:0,accuracy:0,language:0},
+  customAvatar: '',
+  customTheme: '#ff66af',
+  bossDone: {},
+  purchased: []
+};
+let gameState = loadState();
+const state = {...gameState.checks};
+const resourceState = {...gameState.resources};
+const unlockedSet = new Set();
+let timerLeft = 25*60;
+let timerRef = null;
+let weeklyCache = [];
+
+function loadState() {
+  try {
+    const raw = localStorage.getItem(saveKey);
+    if (!raw) return {...defaultGameState};
+    return {...defaultGameState, ...JSON.parse(raw)};
+  } catch (e) {
+    return {...defaultGameState};
+  }
+}
+function saveState() {
+  gameState.checks = state;
+  gameState.resources = resourceState;
+  localStorage.setItem(saveKey, JSON.stringify(gameState));
+}
+function todayKey() {
+  return new Date().toISOString().slice(0,10);
+}
+function markActivity() {
+  const t = todayKey();
+  gameState.history[t] = (gameState.history[t] || 0) + 1;
+  if (gameState.lastActiveDate !== t) {
+    const prev = new Date(gameState.lastActiveDate || t);
+    const now = new Date(t);
+    const diff = Math.round((now - prev)/86400000);
+    gameState.streak = diff === 1 ? gameState.streak + 1 : (diff === 0 ? gameState.streak : 1);
+    gameState.lastActiveDate = t;
+  }
+}
+function gainCoins(n) { gameState.coins += n; }
+function getLevelData() {
+  const topicDone = Object.values(state).filter(Boolean).length;
+  const resourceDone = Object.values(resourceState).filter(Boolean).length;
+  const baseXp = (topicDone + resourceDone) * 12;
+  const bonus = (gameState.skills.accuracy + gameState.skills.memory) * 5;
+  const xp = baseXp + bonus;
+  const level = Math.max(1, Math.floor(xp / 100) + 1);
+  return {xp, level, xpInLevel: xp % 100, topicDone, resourceDone};
+}
+function spawnConfetti() {
+  let layer = document.getElementById('confetti-layer');
+  if (!layer) {
+    layer = document.createElement('div');
+    layer.id = 'confetti-layer';
+    document.body.appendChild(layer);
+  }
+  const icons = ['✨','🎉','🏅','💖','🌟'];
+  for (let i=0;i<15;i++) {
+    const c = document.createElement('div');
+    c.className = 'confetti';
+    c.textContent = icons[Math.floor(Math.random()*icons.length)];
+    c.style.left = (15 + Math.random()*70) + '%';
+    c.style.top = (20 + Math.random()*40) + '%';
+    c.style.animationDelay = (Math.random()*150) + 'ms';
+    layer.appendChild(c);
+    setTimeout(() => c.remove(), 1300);
+  }
+}
+function updateMain() {
+  const total = subjects.reduce((a,s) => a + s.topics.length,0);
+  const done = Object.values(state).filter(Boolean).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('main-bar').style.width = pct + '%';
+  document.getElementById('main-label').textContent = done + ' of ' + total + ' topics completed (' + pct + '%)';
+}
+function updateResourcesMain() {
+  const total = resources.reduce((a,r)=>a+r.items.length,0);
+  const done = Object.values(resourceState).filter(Boolean).length;
+  const pct = total ? Math.round(done/total*100) : 0;
+  document.getElementById('res-main-bar').style.width = pct + '%';
+  document.getElementById('res-main-label').textContent = done + ' of ' + total + ' resources completed (' + pct + '%)';
+}
+function updateAvatar() {
+  const {level, xpInLevel, resourceDone} = getLevelData();
+  let face = gameState.customAvatar || '🌱';
+  let title = 'Seedling Scholar';
+  if (level >= 3) title = 'Focus Explorer';
+  if (level >= 5) title = 'Exam Warrior';
+  if (level >= 8) title = 'Topper Legend';
+  document.getElementById('avatar-face').textContent = face;
+  document.getElementById('avatar-title').textContent = title;
+  document.getElementById('avatar-level').textContent = 'Level ' + level;
+  document.getElementById('avatar-xp').textContent = 'XP ' + xpInLevel + ' / 100';
+  document.getElementById('avatar-streak').textContent = 'Streak ' + gameState.streak;
+  document.getElementById('avatar-xp-bar').style.width = xpInLevel + '%';
+  if (gameState.customTheme) document.documentElement.style.setProperty('--theme-accent', gameState.customTheme);
+
+  const badgeRules = [
+    {name:'Biology Master', on: subjects.find(s=>s.name==='Biology').topics.every((_,j)=>state['Biology'+j])},
+    {name:'Chemistry Champ', on: subjects.find(s=>s.name==='Chemistry').topics.every((_,j)=>state['Chemistry'+j])},
+    {name:'Arabic Ready', on: resources.find(r=>r.name==='Arabic').items.every((_,j)=>resourceState['Arabic'+j])},
+    {name:'English Ready', on: resources.find(r=>r.name==='English').items.every((_,j)=>resourceState['English'+j])},
+    {name:'German Ready', on: resources.find(r=>r.name==='German').items.every((_,j)=>resourceState['German'+j])},
+    {name:'7-Day Streak', on: gameState.streak >= 7},
+    {name:'Level 5 Hero', on: level >= 5},
+    {name:'Resource Hunter', on: resourceDone >= 10}
+  ];
+  const badgesList = document.getElementById('badges-list');
+  badgesList.innerHTML = '';
+  badgeRules.forEach(b => {
+    const el = document.createElement('span');
+    el.className = 'badge ' + (b.on ? 'unlocked' : 'locked');
+    el.textContent = (b.on ? '🏅 ' : '🔒 ') + b.name;
+    badgesList.appendChild(el);
+    if (b.on && !unlockedSet.has(b.name)) {
+      unlockedSet.add(b.name);
+      spawnConfetti();
+    }
+  });
+}
+function renderTracker() {
+  const grid = document.getElementById('tracker-grid');
+  grid.innerHTML = '';
+  subjects.forEach(s => {
+    const card = document.createElement('div');
+    card.className = 'tcard';
+    card.innerHTML = '<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:'+s.color+';margin-bottom:6px">'+s.name+'</div>' +
+      '<div class="pbar-wrap"><div class="pbar-fill" id="bar-'+s.name+'" style="width:0%;background:'+s.color+'"></div></div>' +
+      '<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px" id="txt-'+s.name+'">0 / '+s.topics.length+'</div>';
+    s.topics.forEach((topic, i) => {
+      const key = s.name+i;
+      if (typeof state[key] === 'undefined') state[key] = false;
+      const row = document.createElement('div');
+      row.className = 'check-row';
+      row.innerHTML = '<input type="checkbox" id="cb-'+key+'"><label class="clabel" id="lbl-'+key+'" for="cb-'+key+'">'+topic+'</label>';
+      const input = row.querySelector('input');
+      input.checked = !!state[key];
+      if (input.checked) row.querySelector('label').classList.add('done');
+      input.addEventListener('change', function() {
+        const was = state[key];
+        state[key] = this.checked;
+        document.getElementById('lbl-'+key).className = 'clabel'+(this.checked?' done':'');
+        if (!was && this.checked) { markActivity(); gainCoins(3); }
+        updateSubjectProgress(s);
+        refreshAll();
+      });
+      card.appendChild(row);
+    });
+    grid.appendChild(card);
+    updateSubjectProgress(s);
+  });
+}
+function updateSubjectProgress(s) {
+  const subDone = s.topics.filter((_,j) => state[s.name+j]).length;
+  const subPct = Math.round(subDone/s.topics.length*100);
+  document.getElementById('bar-'+s.name).style.width = subPct+'%';
+  document.getElementById('txt-'+s.name).textContent = subDone+' / '+s.topics.length;
+}
+function renderResources() {
+  const grid = document.getElementById('resources-grid');
+  grid.innerHTML = '';
+  resources.forEach(r => {
+    const card = document.createElement('div');
+    card.className = 'tcard';
+    card.innerHTML = '<div style="font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.04em;color:'+r.color+';margin-bottom:6px">'+r.name+'</div>' +
+      '<div class="pbar-wrap"><div class="pbar-fill" id="rbar-'+r.name+'" style="width:0%;background:'+r.color+'"></div></div>' +
+      '<div style="font-size:11px;color:var(--color-text-secondary);margin-bottom:8px" id="rtxt-'+r.name+'">0 / '+r.items.length+'</div>';
+    r.items.forEach((item,i) => {
+      const key = r.name+i;
+      if (typeof resourceState[key] === 'undefined') resourceState[key] = false;
+      const row = document.createElement('div');
+      row.className = 'check-row';
+      row.innerHTML = '<input type="checkbox" id="rcb-'+key+'"><label class="clabel" id="rlbl-'+key+'" for="rcb-'+key+'">'+item+'</label>';
+      const input = row.querySelector('input');
+      input.checked = !!resourceState[key];
+      if (input.checked) row.querySelector('label').classList.add('done');
+      input.addEventListener('change', function() {
+        const was = resourceState[key];
+        resourceState[key] = this.checked;
+        document.getElementById('rlbl-'+key).className = 'clabel'+(this.checked?' done':'');
+        if (!was && this.checked) { markActivity(); gainCoins(2); }
+        updateResourceProgress(r);
+        refreshAll();
+      });
+      card.appendChild(row);
+    });
+    grid.appendChild(card);
+    updateResourceProgress(r);
+  });
+}
+function updateResourceProgress(r) {
+  const subDone = r.items.filter((_,j)=>resourceState[r.name+j]).length;
+  const subPct = Math.round(subDone/r.items.length*100);
+  document.getElementById('rbar-'+r.name).style.width = subPct+'%';
+  document.getElementById('rtxt-'+r.name).textContent = subDone+' / '+r.items.length;
+}
+function seedQuests() {
+  const list = document.getElementById('quest-list');
+  const date = todayKey();
+  document.getElementById('quest-date').textContent = 'Generated from current weekly plan • ' + date;
+  const week = getCurrentWeeklyCard();
+  const pool = week ? week.days
+    .map(d => d.task)
+    .filter(t => t && t.trim() !== 'Rest' && t.trim() !== '—')
+    .map(t => 'Complete: ' + t) : [];
+  const quests = pool.slice(0,3);
+  list.innerHTML = '';
+  quests.forEach(q => {
+    const row = document.createElement('div');
+    row.className = 'quest';
+    row.innerHTML = '<span>🎯</span><span class="gsmall">'+q+'</span>';
+    list.appendChild(row);
+  });
+  if (!quests.length) list.innerHTML = '<div class="gsmall">All quests completed. You cleared today!</div>';
+}
+function renderBosses() {
+  const bosses = [
+    'Arabic Boss - 1 mock + 2 essay plans',
+    'Biology Boss - 40 mixed questions',
+    'Chemistry Boss - full formula recall + mock',
+    'Physics Boss - derivations sprint',
+    'Geology Boss - map + seismogram challenge'
+  ];
+  const wrap = document.getElementById('boss-list');
+  wrap.innerHTML = '';
+  bosses.forEach((b,i) => {
+    const key = 'boss'+i;
+    const row = document.createElement('div');
+    row.className = 'quest';
+    row.innerHTML = '<input type="checkbox" id="'+key+'"><label for="'+key+'" class="gsmall">'+b+'</label>';
+    const input = row.querySelector('input');
+    input.checked = !!gameState.bossDone[key];
+    input.addEventListener('change', function() {
+      gameState.bossDone[key] = this.checked;
+      if (this.checked) gainCoins(8);
+      refreshAll();
+    });
+    wrap.appendChild(row);
+  });
+}
+function renderEconomy() {
+  document.getElementById('energy-label').textContent = 'Energy: ' + gameState.energy + '/5';
+  document.getElementById('coins-label').textContent = 'Coins: ' + gameState.coins;
+}
+function renderShop() {
+  const items = [
+    {id:'snack', name:'Snack Break (15 coins)', cost:15},
+    {id:'episode', name:'One Episode Reward (30 coins)', cost:30},
+    {id:'outing', name:'Mini Outing (60 coins)', cost:60}
+  ];
+  const wrap = document.getElementById('shop-list');
+  wrap.innerHTML = '';
+  items.forEach(it => {
+    const row = document.createElement('div');
+    row.className = 'shop-item';
+    const bought = gameState.purchased.includes(it.id);
+    row.innerHTML = '<span class="gsmall">'+it.name+'</span><button class="btn ghost" '+(bought?'disabled':'')+'>'+(bought?'Bought':'Buy')+'</button>';
+    row.querySelector('button').addEventListener('click', function() {
+      if (gameState.coins < it.cost) return;
+      gameState.coins -= it.cost;
+      gameState.purchased.push(it.id);
+      refreshAll();
+    });
+    wrap.appendChild(row);
+  });
+}
+function renderSkills() {
+  const {level} = getLevelData();
+  const spent = Object.values(gameState.skills).reduce((a,b)=>a+b,0);
+  const points = Math.max(0, level - 1 - spent);
+  document.getElementById('skill-points').textContent = 'Skill points: ' + points;
+  const defs = [
+    {k:'memory', n:'Memory'},
+    {k:'speed', n:'Speed'},
+    {k:'accuracy', n:'Accuracy'},
+    {k:'language', n:'Language'}
+  ];
+  const wrap = document.getElementById('skills-list');
+  wrap.innerHTML = '';
+  defs.forEach(d => {
+    const row = document.createElement('div');
+    row.className = 'shop-item';
+    row.innerHTML = '<span class="gsmall">'+d.n+' Lv.'+gameState.skills[d.k]+'</span><button class="btn ghost">+1</button>';
+    row.querySelector('button').addEventListener('click', function() {
+      const spentNow = Object.values(gameState.skills).reduce((a,b)=>a+b,0);
+      const left = Math.max(0, level - 1 - spentNow);
+      if (left <= 0) return;
+      gameState.skills[d.k] += 1;
+      refreshAll();
+    });
+    wrap.appendChild(row);
+  });
+}
+function renderWeakness() {
+  const wrap = document.getElementById('weakness-list');
+  const scores = subjects.map(s => {
+    const done = s.topics.filter((_,j)=>state[s.name+j]).length;
+    const pct = Math.round(done / s.topics.length * 100);
+    return {name:s.name,pct};
+  }).sort((a,b)=>a.pct-b.pct).slice(0,3);
+  wrap.innerHTML = '';
+  scores.forEach(s => {
+    const row = document.createElement('div');
+    row.className = 'quest';
+    row.innerHTML = '<span>⚠️</span><span class="gsmall">'+s.name+' - '+s.pct+'% ready</span>';
+    wrap.appendChild(row);
+  });
+}
+function updateTimerLabel() {
+  const m = String(Math.floor(timerLeft/60)).padStart(2,'0');
+  const s = String(timerLeft%60).padStart(2,'0');
+  document.getElementById('timer-label').textContent = m + ':' + s;
+}
+function setupTimer() {
+  document.getElementById('timer-start').onclick = () => {
+    if (timerRef || gameState.energy <= 0) return;
+    gameState.energy -= 1;
+    renderEconomy();
+    timerRef = setInterval(() => {
+      timerLeft -= 1;
+      updateTimerLabel();
+      if (timerLeft <= 0) {
+        clearInterval(timerRef); timerRef = null; timerLeft = 25*60;
+        gainCoins(6); spawnConfetti(); markActivity();
+        refreshAll();
+      }
+    }, 1000);
+  };
+  document.getElementById('timer-pause').onclick = () => { clearInterval(timerRef); timerRef = null; };
+  document.getElementById('timer-reset').onclick = () => { clearInterval(timerRef); timerRef = null; timerLeft = 25*60; updateTimerLabel(); };
+  document.getElementById('rest-btn').onclick = () => { gameState.energy = Math.min(5, gameState.energy + 1); refreshAll(); };
+}
+function renderHeatmap() {
+  const wrap = document.getElementById('heatmap');
+  wrap.innerHTML = '';
+  for (let i=29;i>=0;i--) {
+    const d = new Date(); d.setDate(d.getDate()-i);
+    const key = d.toISOString().slice(0,10);
+    const count = gameState.history[key] || 0;
+    const cell = document.createElement('div');
+    cell.className = 'heat';
+    const color = count === 0 ? '#f3e6ed' : count < 3 ? '#ffd8eb' : count < 6 ? '#ff9eca' : '#29b76d';
+    cell.style.background = color;
+    cell.title = key + ': ' + count + ' actions';
+    wrap.appendChild(cell);
+  }
+}
+function renderCountdowns() {
+  const exams = [
+    ['Arabic','2026-05-16'],['Biology P1','2026-05-19'],['Biology P2','2026-05-22'],
+    ['Chemistry P1','2026-05-25'],['Chemistry P2','2026-05-28'],['Physics P1','2026-05-31'],
+    ['Physics P2','2026-06-03'],['Geology P1','2026-06-06'],['Geology P2','2026-06-09'],
+    ['English','2026-06-12'],['German','2026-06-15']
+  ];
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const upcoming = exams.find(e => new Date(e[1]) >= today);
+  const wrap = document.getElementById('countdown-list');
+  wrap.innerHTML = '';
+  exams.forEach(e => {
+    const examDate = new Date(e[1]);
+    const examDay = new Date(examDate.getFullYear(), examDate.getMonth(), examDate.getDate());
+    const days = Math.ceil((examDay - today)/86400000);
+    const isDone = days < 0;
+    const isToday = days === 0;
+    const isNext = upcoming && upcoming[0] === e[0] && upcoming[1] === e[1];
+    let tag = 'D-' + days;
+    if (isDone) tag = 'Done';
+    if (isToday) tag = 'Today';
+    const row = document.createElement('div');
+    row.className = 'countdown';
+    row.innerHTML = '<span class="gsmall">' + (isNext ? '⭐ NEXT EXAM — ' : '') + e[0] + '</span><span class="chip">'+tag+'</span>';
+    if (isDone) row.style.opacity = '.6';
+    if (isToday) row.style.fontWeight = '700';
+    wrap.appendChild(row);
+  });
+}
+function renderNextExamBanner() {
+  const exams = [
+    ['Arabic','2026-05-16','Nahw + writing'],
+    ['Biology P1','2026-05-19','Systems recall + MCQs'],
+    ['Biology P2','2026-05-22','Weak systems + diagrams'],
+    ['Chemistry P1','2026-05-25','Stoich + equilibrium drills'],
+    ['Chemistry P2','2026-05-28','Organic map + past paper'],
+    ['Physics P1','2026-05-31','Capacitors + AC problems'],
+    ['Physics P2','2026-06-03','Derivations + circuits'],
+    ['Geology P1','2026-06-06','Rock cycle + seismograms'],
+    ['Geology P2','2026-06-09','Maps + remote sensing'],
+    ['English','2026-06-12','Cycles vocab + writing'],
+    ['German','2026-06-15','Grammar + Lektionen recap']
+  ];
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const next = exams.find(e => new Date(e[1]) >= today);
+  const banner = document.getElementById('next-exam-banner');
+  if (!next) {
+    banner.textContent = 'All exams completed. Great job!';
+    return;
+  }
+  const examDate = new Date(next[1]);
+  const examDay = new Date(examDate.getFullYear(), examDate.getMonth(), examDate.getDate());
+  const days = Math.ceil((examDay - today) / 86400000);
+  const dText = days === 0 ? 'Today' : 'D-' + days;
+  banner.textContent = 'Next exam: ' + next[0] + ' • ' + dText + ' • Suggested focus: ' + next[2];
+}
+function setupCustomization() {
+  const avatars = ['🌱','🧠','⚔️','🏆','🦊','🐼'];
+  const themes = ['#ff66af','#24b66a','#8f6bff','#ff9952'];
+  const aw = document.getElementById('avatar-picker');
+  const tw = document.getElementById('theme-picker');
+  aw.innerHTML = ''; tw.innerHTML = '';
+  avatars.forEach(a => {
+    const b = document.createElement('button');
+    b.className = 'btn ghost'; b.textContent = a;
+    b.onclick = () => { gameState.customAvatar = a; refreshAll(); };
+    aw.appendChild(b);
+  });
+  themes.forEach(c => {
+    const b = document.createElement('button');
+    b.className = 'btn ghost'; b.textContent = c;
+    b.style.borderColor = c;
+    b.onclick = () => {
+      gameState.customTheme = c;
+      document.querySelectorAll('.btn,.tab.active').forEach(el => { el.style.background = c; el.style.color = '#fff'; });
+      refreshAll();
+    };
+    tw.appendChild(b);
+  });
+}
+function extractWeeklyCardsFromDom() {
+  const cards = [...document.querySelectorAll('#wk .wcard')];
+  return cards.map(card => {
+    const title = (card.querySelector('.wtitle')?.textContent || '').trim();
+    const days = [...card.querySelectorAll('.dc')].map(dc => {
+      const day = (dc.querySelector('.dn')?.textContent || '').trim();
+      const task = (dc.querySelector('.ds')?.textContent || '').trim();
+      const colorClass = [...dc.classList].find(c => c.startsWith('c-')) || 'c-off';
+      return { day, task, colorClass };
+    });
+    return { title, days };
+  }).filter(c => c.title);
+}
+function getCurrentWeeklyCard() {
+  if (!weeklyCache.length) return null;
+  const start = new Date('2026-04-21T00:00:00');
+  const now = new Date();
+  const idx = Math.max(0, Math.min(weeklyCache.length - 1, Math.floor((now - start) / (7 * 86400000))));
+  return weeklyCache[idx];
+}
+function renderTimelineFromWeekly() {
+  const tl = document.getElementById('tl');
+  if (!tl || !weeklyCache.length) return;
+  let html = '<div style="padding:10px 12px;background:var(--color-background-secondary);border-radius:10px;font-size:14px;color:var(--color-text-secondary);margin-bottom:14px">Timeline is now auto-built from the Weekly tab so both views stay aligned.</div>';
+  weeklyCache.forEach((week, i) => {
+    const first = week.days[0]?.day || 'Start';
+    const last = week.days[week.days.length - 1]?.day || 'End';
+    html += '<div class="row"><div class="dlabel">Week ' + (i + 1) + '<br>' + first + ' - ' + last + '</div><div class="blk c-en"><div class="btitle">' + week.title + '</div><div class="bsub">' + week.days.map(d => d.day + ': ' + d.task).join(' · ') + '</div></div></div>';
+  });
+  tl.innerHTML = html;
+}
+function refreshAll() {
+  updateMain();
+  updateResourcesMain();
+  updateAvatar();
+  seedQuests();
+  renderBosses();
+  renderEconomy();
+  renderShop();
+  renderSkills();
+  renderWeakness();
+  renderHeatmap();
+  renderCountdowns();
+  renderNextExamBanner();
+  updateTimerLabel();
+  saveState();
+}
+
+renderTracker();
+renderResources();
+weeklyCache = extractWeeklyCardsFromDom();
+renderTimelineFromWeekly();
+setupTimer();
+setupCustomization();
+refreshAll();
+</script>
